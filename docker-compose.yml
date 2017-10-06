@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  bulk-rna-kallisto-qc:
+    build: .
+    image: bulk-rna-kallisto-qc
+    volumes:
+      - /home/pawel/Data/reference-files/kallisto/index_mouse_blades:/index/:ro
+      - /home/pawel/Data/bulk/Project_ALH_LCFA/run_170220/Sample_3229:/input/:ro
+      - /home/pawel/Data/temp:/output/:rw
