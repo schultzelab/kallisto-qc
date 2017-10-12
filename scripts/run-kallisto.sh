@@ -1,24 +1,28 @@
 #!/bin/bash
 
-input=$1
+inputs=$2
+output=$1
+
+echo $inputs
+echo $output
 
 # actual alignment
 kallisto quant \
-         -o /output \
+         -o $output \
          -i /index/index \
-         -t 10 \
+         -t 4 \
          --single \
-         -l 200 \
-         -s 20 \
-         $input/*.fastq.gz
+         -l 75 \
+         -s 1 \
+         $inputs
 
-# we have to run kallisto for the second time to get the
-# pseudoalignment output
-kallisto pseudo \
-         -o /output \
-         -i /index/index \
-         -t 10 \
-         --single \
-         -l 200 \
-         -s 20 \
-         $input/*.fastq.gz
+# # we have to run kallisto for the second time to get the
+# # pseudoalignment output
+# kallisto pseudo \
+#          -o $output \
+#          -i /index/index \
+#          -t 10 \
+#          --single \
+#          -l 75 \
+#          -s 1 \
+#          $inputs

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-output=$1
+output=/output/kallisto
 
 nprocessed=$(cat $output/run_info.json | jq -r '.n_processed')
 ntargets=$(cat $output/run_info.json | jq -r '.n_targets')

@@ -1,9 +1,21 @@
 #!/bin/bash
 
-# 1. run fastqc
+set -a
 
-# 2. run kallisto
-/scripts/run-kallisto.sh /input
+jobs=$1
 
-# 3. run summary
-/scripts/run-summary.sh /output
+samples=$(for d in $(ls /input); do ls -1 /input/$d; done | sort | uniq)
+
+function align {
+    sample=$1
+    fastqs=$(ls /input/*/$sample/*.fastq.gz)
+    /scripts/run-kallisto.sh /output/kallisto/$sample/ "$fastqs"
+}
+
+export -f align
+parallel --eta --will-cite -j $jobs align {} ::: $samples
+
+Rscript /scripts/aggregate.R
+
+# run fastqc
+# /scripts/run-fastqc.sh
