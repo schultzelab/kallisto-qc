@@ -21,3 +21,15 @@ counts = counts[filter,]
 
 write.csv(ngenes.per.sample, file="/output/genecounts.csv")
 write.csv(counts, file="/output/counts.csv")
+
+library(ggplot2)
+library(reshape2)
+
+genecounts=read.csv("/output/genecounts.csv",row.names=1)
+genecounts$Category = row.names(ngenes.per.sample)
+
+pdf("/output/GeneCounts.pdf")
+ggplot(melt(genecounts),aes(x=variable,y=value))+
+    geom_point(aes(color=Category))+
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+dev.off()
