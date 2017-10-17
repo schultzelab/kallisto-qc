@@ -45,7 +45,7 @@ mkdir -p $output
 # the alignment statistics (not provided in the current kallisto
 # version)
 
-for mode in quant pseudo; do
+for mode in quant; do
     cmd="kallisto $mode -o $output -i $index -t $threads"
     if [ -n $paired ]; then
         cmd="$cmd"
@@ -53,30 +53,6 @@ for mode in quant pseudo; do
         cmd="$cmd --single -l 75 -s 1"
     fi
 
-    echo "$input"
-
-    cmd="$cmd $input"
-    echo "$cmd"
+    cmd="$cmd $input &> $output/kallisto.log"
     eval "$cmd"
 done
-
-# actual alignment
-# kallisto quant \
-#          -o $output \
-#          -i /index/index \
-#          -t 4 \
-#          --single \
-#          -l 75 \
-#          -s 1 \
-#          $inputs
-
-# # we have to run kallisto for the second time to get the
-# # pseudoalignment output
-# kallisto pseudo \
-#          -o $output \
-#          -i /index/index \
-#          -t 10 \
-#          --single \
-#          -l 75 \
-#          -s 1 \
-#          $inputs

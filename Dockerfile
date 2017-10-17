@@ -27,6 +27,10 @@ RUN wget http://ftpmirror.gnu.org/parallel/parallel-20170922.tar.bz2 && \
     cd parallel-20170922 && \
     ./configure && make && make install
 
+RUN apt-get update && apt-get install -y python-pip
+
+RUN pip install git+https://github.com/ewels/MultiQC.git@7edc7bbbab1a66f2c028f686b279c9a0c56f92ff
+
 COPY scripts /scripts
 
 ENTRYPOINT ["bash","/scripts/run-all.sh"]

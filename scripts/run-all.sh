@@ -97,19 +97,11 @@ function align {
             -x $index \
             -o $outputk
     fi
-    nreads=$(cat $outputk/run_info.json | jq -r '.n_processed')
-    naligned=$(cat $outputk/pseudoalignments.tsv \
-                   | cut -f2 \
-                   | paste -sd+ \
-                   | bc )
-    percentage=$(echo "scale=4; $naligned/$nreads" | bc)
-    echo "$sample,$nreads,$naligned,$percentage" > $outputk/stats.csv
 }
 
 export -f align
-
 parallel --eta --will-cite -j $jobs align {} ::: $samples
-echo "sample,nreads,naligned,percentage" > /output/kallisto-stats.csv
-find /output/kallisto -name 'stats.csv' | xargs cat  >> /output/kallisto-stats.csv
+
+/scripts/multiqc.sh
 
 Rscript /scripts/aggregate.R
