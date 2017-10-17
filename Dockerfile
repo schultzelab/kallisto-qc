@@ -2,7 +2,8 @@ FROM ubuntu:17.10
 
 RUN apt-get update && \
     apt-get install -y \
-    git cmake zlib1g libhdf5-dev build-essential wget curl unzip jq bc openjdk-8-jre perl unzip r-base && \
+    git cmake zlib1g libhdf5-dev build-essential wget curl unzip jq bc openjdk-8-jre perl unzip r-base libxml2-dev \
+    libcurl4-openssl-dev && \
     rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/makaho/kallisto.git && \
@@ -29,4 +30,4 @@ RUN wget http://ftpmirror.gnu.org/parallel/parallel-20170922.tar.bz2 && \
 COPY scripts /scripts
 
 ENTRYPOINT ["bash","/scripts/run-all.sh"]
-CMD ["1"]
+CMD [""]

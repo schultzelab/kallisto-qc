@@ -4,12 +4,15 @@ services:
   bulk-rna-kallisto-qc:
     build: .
     image: bulk-rna-kallisto-qc
+    # entrypoint: "bash"
     # number of jobs
-    command: "4"
+    command: "-j 4 -t 10 -p -f"
     volumes:
-      - /home/pawel/Data/reference-files/kallisto/index_human:/index/:ro
+      - /home/pawel/Data/reference-files/kallisto/index_mouse_blades:/index/:ro
       # either mount all the runs as a single directory
-      - /home/pawel/Data/bulk/Project_ALH_LCFA/runs:/input:ro
+      # - /home/pawel/Data/bulk/Project_ALH_LCFA/runs:/input:ro
+      # - /home/pawel/Data/bulk/Project_RNA_Jackson_Kaczmarczyk_S20_C3/run_170928_test:/input/run_170928:ro
+      - /home/pawel/Data/bulk/Project_RNA_Jackson_Kaczmarczyk_S20_C3/run_170928:/input/run_170928:ro
       # or mount them separately
       # - /home/pawel/Data/bulk/Project_ALH_LCFA/runs/170220/:/input/170220:ro
       # - /home/pawel/Data/bulk/Project_ALH_LCFA/runs/170222/:/input/170222:ro
