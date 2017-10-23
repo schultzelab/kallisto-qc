@@ -2,19 +2,22 @@ version: '3'
 
 services:
   bulk-rna-kallisto-qc:
-    build: .
-    image: bulk-rna-kallisto-qc
-    # entrypoint: "bash"
-    # number of jobs
+    image: pwlb/bulk-rna-kallisto-qc
+    # -j: number of jobs
+    # -t: number of threads
+    # -p: use if paired end reads
+    # -f: use if directory structure is flat
     command: "-j 4 -t 10 -p -f"
     volumes:
-      - /home/pawel/Data/reference-files/kallisto/index_mouse_blades:/index/:ro
-      # either mount all the runs as a single directory
-      # - /home/pawel/Data/bulk/Project_ALH_LCFA/runs:/input:ro
-      # - /home/pawel/Data/bulk/Project_RNA_Jackson_Kaczmarczyk_S20_C3/run_170928_test:/input/run_170928:ro
-      - /home/pawel/Data/bulk/Project_RNA_Jackson_Kaczmarczyk_S20_C3/run_170928:/input/run_170928:ro
-      # or mount them separately
-      # - /home/pawel/Data/bulk/Project_ALH_LCFA/runs/170220/:/input/170220:ro
-      # - /home/pawel/Data/bulk/Project_ALH_LCFA/runs/170222/:/input/170222:ro
-      # - /home/pawel/Data/bulk/Project_ALH_LCFA/runs/170306/:/input/170306:ro
-      - /home/pawel/Data/temp:/output/:rw
+
+      # mount the index file
+      - /home/pawel/Data/reference-files/kallisto/index_human/index:/index/index:ro
+
+      # and the tx2genes file (containing transcript vs gene names)
+      - /home/pawel/Data/reference-files/kallisto/index_human/index/tx2genes.csv:/index/tx2genes.csv:ro
+
+      # mount all the runs as a single directory
+      - /home/pawel/Data/bulk/Project_RNA_Schultze_Kapellos_COPD/run_170928:/input/run_170928:ro
+
+      # output folder
+      - /home/pawel/Data/bulk/Project_RNA_Schultze_Kapellos_COPD/analysis:/output:rw
