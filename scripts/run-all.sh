@@ -39,7 +39,7 @@ done
 
 runs=$(ls -1 $input)
 
-if [ -n $flat ]; then
+if [ -n "$flat" ]; then
     echo "Creating new directory structure for samples"
     inputnew="/inputnew"
     for r in $runs; do
@@ -81,7 +81,7 @@ samples=$(for d in $(ls $input); do ls -1 $input/$d; done | sort | uniq)
 function align {
     sample=$1
     outputk="/output/kallisto/$sample/"
-    if [ -n $paired ]; then
+    if [ -n "$paired" ]; then
         fastqs=$(paste <(ls $input/*/$sample/*R1*.fastq.gz) <(ls $input/*/$sample/*R2*.fastq.gz) | tr '\n' ' ')
         /scripts/run-kallisto.sh \
             -p \
@@ -90,7 +90,7 @@ function align {
             -x $index \
             -o $outputk
     else
-        fastqs=$(ls $input/*/$sample/*.fastq.gz)
+        fastqs=$(ls $input/*/$sample/*R1*.fastq.gz)
         /scripts/run-kallisto.sh \
             -t $threads \
             -i "$fastqs" \

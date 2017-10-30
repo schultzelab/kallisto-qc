@@ -47,7 +47,7 @@ mkdir -p $output
 
 for mode in quant; do
     cmd="kallisto $mode -o $output -i $index -t $threads"
-    if [ -n $paired ]; then
+    if [ -n "$paired" ]; then
         cmd="$cmd"
     else
         cmd="$cmd --single -l 75 -s 1"
