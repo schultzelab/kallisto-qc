@@ -90,7 +90,7 @@ function align {
             -x $index \
             -o $outputk
     else
-        fastqs=$(ls $input/*/$sample/*R1*.fastq.gz)
+        fastqs=$(ls $input/*/$sample/*R1*.fastq.gz | tr '\n' ' ')
         /scripts/run-kallisto.sh \
             -t $threads \
             -i "$fastqs" \

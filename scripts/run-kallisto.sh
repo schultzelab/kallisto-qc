@@ -45,14 +45,12 @@ mkdir -p $output
 # the alignment statistics (not provided in the current kallisto
 # version)
 
-for mode in quant; do
-    cmd="kallisto $mode -o $output -i $index -t $threads"
-    if [ -n "$paired" ]; then
-        cmd="$cmd"
-    else
-        cmd="$cmd --single -l 75 -s 1"
-    fi
+cmd="kallisto quant -o $output -i $index -t $threads"
+if [ -n "$paired" ]; then
+    cmd="$cmd"
+else
+    cmd="$cmd --single -l 75 -s 1"
+fi
 
-    cmd="$cmd $input &> $output/kallisto.log"
-    eval "$cmd"
-done
+cmd="$cmd $input &> $output/kallisto.log"
+eval "$cmd"
