@@ -11,9 +11,7 @@ flat=""
 
 function show_help(){
     echo """
-    run-all -p if paired end
-            -f if flat directory structure
-            -j [kallisto jobs]
+    run-all -j [kallisto jobs]
             -t [threads per job]
             -h
             [OPTIONS]
@@ -26,10 +24,6 @@ while getopts "j:t:e:hpf" opt; do
             ;;
         j)  jobs="$OPTARG"
             ;;
-        p)  paired="true"
-            ;;
-        f)  flat="true"
-            ;;
         h|\?)
             show_help
             exit 0
@@ -38,28 +32,33 @@ while getopts "j:t:e:hpf" opt; do
 done
 
 runs=$(ls -1 $input)
+samples=$(find $input -name "*.fastq.gz" -type f -printf "%f\n"|cut -d'_' -f1|sort|uniq)
+readends=$(find $input -name "*.fastq.gz" -type f -printf "%f\n"|cut -d'_' -f4|sort|uniq)
 
-if [ -n "$flat" ]; then
-    echo "Creating new directory structure for samples"
-    inputnew="/inputnew"
-    for r in $runs; do
-        /scripts/samplestodirs.sh $input/$r $inputnew/$r
-    done
-    input=$inputnew
-fi
+echo """
+Processing runs
+$runs
 
-# run fastqc
-# todo parallelize
+samples
+$samples
+
+read-ends
+$readends
+""" > $output/input.log
+
+# generate a name of the form $output/[RUNID]/[SAMPLEID]/[R{1,2}]/originalfilename.fastq.gz
+function tagstofiles {
+    basedir="$1"
+    runid="$2"
+    sampleid="$3"
+    R=$4
+    find $basedir/$runid -name "${sampleid}_*_${R}_*.fastq.gz" -type f|sort
+}
+export -f tagstofiles
+
 for run in $runs; do
-
-    if [ -n "$paired" ]; then
-        ends="R1 R2"
-    else
-        ends="R1"
-    fi
-
-    for R in $ends; do
-        fastqs=$(find $input/$run -name "*$R*.fastq.gz")
+    for R in $readends; do
+        fastqs=$(tagstofiles $input $run "*" $R)
 
         mergedfastq=/tmp/merged$R.fastq
 
@@ -76,30 +75,25 @@ for run in $runs; do
     done
 done
 
-samples=$(for d in $(ls $input); do ls -1 $input/$d; done | sort | uniq)
-
 function align {
-    sample=$1
-    outputk="/output/kallisto/$sample/"
-    if [ -n "$paired" ]; then
-        fastqs=$(paste <(ls $input/*/$sample/*R1*.fastq.gz) <(ls $input/*/$sample/*R2*.fastq.gz) | tr '\n' ' ')
-        /scripts/run-kallisto.sh \
-            -p \
-            -t $threads \
-            -i "$fastqs" \
-            -x $index \
-            -o $outputk
-    else
-        fastqs=$(ls $input/*/$sample/*R1*.fastq.gz | tr '\n' ' ')
-        /scripts/run-kallisto.sh \
-            -t $threads \
-            -i "$fastqs" \
-            -x $index \
-            -o $outputk
-    fi
-}
+    sampleid=$1
+    outputk="/output/kallisto/$sampleid/"
 
+    fastqs=$(paste \
+                 <(tagstofiles $input "*" $sampleid "R1") \
+                 <(tagstofiles $input "*" $sampleid "R2"))
+
+    cmd="/scripts/run-kallisto.sh -t $threads -i \"$fastqs\" -x $index -o $outputk"
+
+    # enable paired end in kallisto if necessary
+    if [ "$(echo $readends)" == "R1 R2" ]; then
+        cmd="$cmd -p"
+    fi
+
+    eval $cmd
+}
 export -f align
+
 parallel --eta --will-cite -j $jobs align {} ::: $samples
 
 /scripts/multiqc.sh

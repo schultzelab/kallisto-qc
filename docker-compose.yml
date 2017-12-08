@@ -5,16 +5,21 @@ services:
     image: pwlb/bulk-rna-kallisto-qc
     # -j: number of jobs
     # -t: number of threads
-    # -p: use if paired end reads
-    # -f: use if directory structure is flat
-    command: "-j 4 -t 10 -p -f"
+    command: "-j 4 -t 10"
+
+    # use when debugging
+    # command: ""
+    # entrypoint: "/bin/bash"
+    # stdin_open: true
+    # tty: true
+
     volumes:
 
       # mount the index file
       - /home/pawel/Data/reference-files/kallisto/index_human/index:/index/index:ro
 
       # and the tx2genes file (containing transcript vs gene names)
-      - /home/pawel/Data/reference-files/kallisto/index_human/index/tx2genes.csv:/index/tx2genes.csv:ro
+      - /home/pawel/Data/reference-files/kallisto/index_human/tx2genes.csv:/index/tx2genes.csv:ro
 
       # mount all the runs as a single directory
       - /home/pawel/Data/bulk/Project_RNA_Schultze_Kapellos_COPD/run_170928:/input/run_170928:ro
