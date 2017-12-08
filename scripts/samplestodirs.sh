@@ -5,7 +5,7 @@ output=$2
 
 mkdir -p $output
 
-samples=$(ls -1 $dir | grep "fastq.gz"| awk '{print substr($0,0,8)}' | sort | uniq)
+samples=$(ls -1 $dir | grep "fastq.gz"| awk '{split($0,a,"_"); print a[1]}' | sort | uniq)
 
 for sample in $samples; do
     mkdir -p $output/$sample
