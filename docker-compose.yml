@@ -2,10 +2,17 @@ version: '3'
 
 services:
   bulk-rna-kallisto-qc:
+    build: .
     image: pwlb/bulk-rna-kallisto-qc
-    # -j: number of jobs
-    # -t: number of threads
-    command: "-j 4 -t 10"
+    environment:
+
+      # any command that takes full path as an input and produces a
+      # sampleid at the output.  As per docker-compose specification,
+      # the `$` sign has to be escaped with `$$`.
+
+      - FILTERSAMPLEID=gawk '{match($$0,"/([^_/]+)_[^/]*L[0-9]{3}_R[12]_[0-9]{3}.fastq.gz",a); print a[1]}'
+      - JOBS=4
+      - THREADS=10
 
     # use when debugging
     # command: ""
@@ -21,8 +28,11 @@ services:
       # and the tx2genes file (containing transcript vs gene names)
       - /home/pawel/Data/reference-files/kallisto/index_human/tx2genes.csv:/index/tx2genes.csv:ro
 
-      # mount all the runs as a single directory
-      - /home/pawel/Data/bulk/Project_RNA_Schultze_Kapellos_COPD/run_170928:/input/run_170928:ro
+      # # mount all the runs as a single directory
+      # - /home/pawel/Data/bulk/Project_RNA_Schultze_Kapellos_COPD/run_170928:/input/run_170928:ro
 
-      # output folder
-      - /home/pawel/Data/bulk/Project_RNA_Schultze_Kapellos_COPD/analysis:/output:rw
+      # # output folder
+      # - /home/pawel/Data/bulk/Project_RNA_Schultze_Kapellos_COPD/analysis:/output:rw
+
+      - /home/pawel/Data/bulk/Project_RNA_Wachten_Jansen_S6/run_171006:/input/run_171006:ro
+      - /home/pawel/Data/bulk/Project_RNA_Wachten_Jansen_S6/analysis:/output:rw

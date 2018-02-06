@@ -2,37 +2,12 @@
 
 set -a
 
-paired=""
-jobs="1"
-threads="1"
 input="/input"
+output="/output"
 index="/index/index"
-flat=""
-
-function show_help(){
-    echo """
-    run-all -j [kallisto jobs]
-            -t [threads per job]
-            -h
-            [OPTIONS]
-"""
-}
-
-while getopts "j:t:e:hpf" opt; do
-    case "$opt" in
-        t)  threads="$OPTARG"
-            ;;
-        j)  jobs="$OPTARG"
-            ;;
-        h|\?)
-            show_help
-            exit 0
-            ;;
-    esac
-done
 
 runs=$(ls -1 $input)
-samples=$(find $input -name "*.fastq.gz" -type f -printf "%f\n"|cut -d'_' -f1|sort|uniq)
+samples=$(find $input -name "*.fastq.gz" -type f | eval "$FILTERSAMPLEID" |sort|uniq)
 readends=$(find $input -name "*.fastq.gz" -type f -printf "%f\n"|cut -d'_' -f4|sort|uniq)
 
 echo """
@@ -45,20 +20,36 @@ $samples
 read-ends
 $readends
 """ > $output/input.log
+echo $samples > $output/sampleids.log
 
-# generate a name of the form $output/[RUNID]/[SAMPLEID]/[R{1,2}]/originalfilename.fastq.gz
+# generate a list of files in $input with a given runid, sampleid and R
 function tagstofiles {
-    basedir="$1"
-    runid="$2"
-    sampleid="$3"
-    R=$4
-    find $basedir/$runid -name "${sampleid}_*_${R}_*.fastq.gz" -type f|sort
+    runid="$1"
+    sampleid="$2"
+    R=$3
+
+    files=$(mktemp)
+
+    find $input/$runid -name "*_${R}_*.fastq.gz" > $files
+
+    if [ "$sampleid" == "*" ]; then
+        cat $files
+        exit 0
+    else
+        paste -d',' \
+              <(cat $files \
+                    | eval $FILTERSAMPLEID ) \
+              <(cat $files) \
+            | awk -F',' -v sampleid="$sampleid" '{if($1==sampleid) print $2}' \
+            | sort
+    fi
 }
+
 export -f tagstofiles
 
 for run in $runs; do
     for R in $readends; do
-        fastqs=$(tagstofiles $input $run "*" $R)
+        fastqs=$(tagstofiles $run "*" $R)
 
         mergedfastq=/tmp/merged$R.fastq
 
@@ -66,9 +57,9 @@ for run in $runs; do
         for fastq in $fastqs; do
             zcat $fastq | head -n 40000 >> $mergedfastq
         done
-        mkdir -p /output/fastqc/$run/$R
-        fastqc -o /output/fastqc/$run/$R \
-               -t $threads \
+        mkdir -p $output/fastqc/$run/$R
+        fastqc -o $output/fastqc/$run/$R \
+               -t $THREADS \
                $mergedfastq
 
         rm -f $mergedfastq
@@ -80,10 +71,10 @@ function align {
     outputk="/output/kallisto/$sampleid/"
 
     fastqs=$(paste \
-                 <(tagstofiles $input "*" $sampleid "R1") \
-                 <(tagstofiles $input "*" $sampleid "R2"))
+                 <(tagstofiles "*" $sampleid "R1") \
+                 <(tagstofiles "*" $sampleid "R2"))
 
-    cmd="/scripts/run-kallisto.sh -t $threads -i \"$fastqs\" -x $index -o $outputk"
+    cmd="/scripts/run-kallisto.sh -t $THREADS -i \"$fastqs\" -x $index -o $outputk"
 
     # enable paired end in kallisto if necessary
     if [ "$(echo $readends)" == "R1 R2" ]; then
@@ -94,7 +85,7 @@ function align {
 }
 export -f align
 
-parallel --eta --will-cite -j $jobs align {} ::: $samples
+parallel --eta --will-cite -j $JOBS align {} ::: $samples
 
 /scripts/multiqc.sh
 
