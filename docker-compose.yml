@@ -5,12 +5,6 @@ services:
     build: .
     image: pwlb/bulk-rna-kallisto-qc
     environment:
-
-      # any command that takes full path as an input and produces a
-      # sampleid at the output.  As per docker-compose specification,
-      # the `$` sign has to be escaped with `$$`.
-
-      - FILTERSAMPLEID=gawk '{match($$0,"/([^_/]+)_[^/]*L[0-9]{3}_R[12]_[0-9]{3}.fastq.gz",a); print a[1]}'
       - JOBS=4
       - THREADS=10
 
