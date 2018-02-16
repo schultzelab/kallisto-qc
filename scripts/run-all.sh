@@ -8,7 +8,11 @@ index="/index/index"
 
 runs=$(ls -1 $input)
 samples=$(find $input -name "*.fastq.gz" -type f | eval "$FILTERSAMPLEID" |sort|uniq)
-readends=$(find $input -name "*.fastq.gz" -type f -printf "%f\n"|cut -d'_' -f4|sort|uniq)
+# readends=$(find $input -name "*.fastq.gz" -type f -printf "%f\n"|cut -d'_' -f4|sort|uniq)
+# should contain either "R1" or "R1 R2"
+readends=$(find $input -name "*.fastq.gz" -type f -printf "%f\n"|grep -o "_R[12]_"|tr -d '_'|sort|uniq)
+# remove any newlines
+readends="$(echo $readends)"
 
 echo """
 Processing runs
@@ -21,6 +25,17 @@ read-ends
 $readends
 """ > $output/input.log
 echo $samples > $output/sampleids.log
+
+if [ -z $samples ]; then
+    echo "Could not find any samples"
+    exit 1
+fi
+
+if [ "$readends" != "R1" ] && [ "$readends" != "R1 R2" ]; then
+    echo "Could not find proper read ends, see input.log for details"
+    exit 1
+fi
+
 
 # generate a list of files in $input with a given runid, sampleid and R
 function tagstofiles {
