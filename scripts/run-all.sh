@@ -26,7 +26,7 @@ $readends
 """ > $output/input.log
 echo $samples > $output/sampleids.log
 
-if [ -z $samples ]; then
+if [ -z "$samples" ]; then
     echo "Could not find any samples"
     exit 1
 fi
