@@ -45,7 +45,7 @@ mkdir -p $output
 # the alignment statistics (not provided in the current kallisto
 # version)
 
-cmd="kallisto quant -o $output -i $index -t $threads"
+cmd="kallisto quant -o $output -i $index -t $threads $KALLISTOOPTIONS"
 if [ -n "$paired" ]; then
     cmd="$cmd"
 else

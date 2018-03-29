@@ -7,9 +7,9 @@ fastq files.  The output is a set of QC reports and a count table.
 
 The internal scripts expect the following folder structure
 
-- `/index/index`: the kallisto index file
-- `/index/tx2genes.csv`: a tx2genes.csv file that is used to convert
-  the transcript names to gene names
+- `/index/index`: the kallisto index file.
+- `/index/annotations.gtf`: a annotations file used to convert
+  transcript counts to gene counts.
 - `/input/XXXXX`, `/input/YYYYY`, etc. the "runs" to be used in the
   alignment.  In practice these are the folders containing `fastq.gz`
   files that are interpreted as samples.  How exactly this
@@ -25,29 +25,23 @@ All parameters are passed as environmental variables through the
         - JOBS=4
         - THREADS=10
 
-The above parameters are self-explanatory, there is also a
-`FILTERSAMPLEID`, which extracts the sample id from the filenames.
-Consider a sample filename of the following form
+in the above example `JOBS` is the number of independent kallisto
+processes, threads is the number of threads per kallisto process.
+
+The pipeline extracts the sample id as the expression before the first
+underscore in the base filename.  That is if the fastq files are named
+as
 
     /input/run_171006/Sample_3651/3651_ATTCCT_L002_R1_001.fastq.gz
 
-the exact form depends on how you mounted the directories in the
-docker container and on the format of the files you are analyzing.
+the sample id first extracts the file name
+`3651_ATTCCT_L002_R1_001.fastq.gz` and then the first part before the
+underscore, `3651`, becomes the sample id.  If the naming convention
+differs from the one described above a user can specify any
+pipe-compatible command via `FILTERSAMPLEID`, for example, the default
+value of `FILTERSAMPLEID` is
 
-To extract the sample id from the directory name select `Sample_3651`
-first and then the `3651` from that
-
-    FILTERSAMPLEID=cut -d'/' -f4 | cut -d'_' -f2
-
-Or you could just as easily select the first part of the base filename
-
-    FILTERSAMPLEID=cut -d'/' -f5 | cut -d'_' -f1
-
-By default the FILTERSAMPLEI selects exactly the part of the base
-filename before `_ATTCCT`, that is `3651` and is a little bit more
-complicated
-
-    FILTERSAMPLEID=gawk '{match($$0,"/([^_/]+)_[^/]*L[0-9]{3}_R[12]_[0-9]{3}.fastq.gz",a); print a[1]}'
+    FILTERSAMPLEID="awk -F \"/\" '{print \$NF}'|cut -d'_' -f1"
 
 *Important:* As per docker-compose specification, the `$` sign has to
-be escaped with `$$`.
+be escaped with `$$` in the docker-compose.yml file.

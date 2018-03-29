@@ -20,13 +20,7 @@ services:
       - /home/pawel/Data/reference-files/kallisto/index_human/index:/index/index:ro
 
       # and the tx2genes file (containing transcript vs gene names)
-      - /home/pawel/Data/reference-files/kallisto/index_human/tx2genes.csv:/index/tx2genes.csv:ro
+      - /home/pawel/Data/reference-files/kallisto/index_human/annotations.gtf:/index/annotations.gtf:ro
 
-      # # mount all the runs as a single directory
-      # - /home/pawel/Data/bulk/Project_RNA_Schultze_Kapellos_COPD/run_170928:/input/run_170928:ro
-
-      # # output folder
-      # - /home/pawel/Data/bulk/Project_RNA_Schultze_Kapellos_COPD/analysis:/output:rw
-
-      - /home/pawel/Data/bulk/Project_RNA_Wachten_Jansen_S6/run_171006:/input/run_171006:ro
-      - /home/pawel/Data/bulk/Project_RNA_Wachten_Jansen_S6/analysis:/output:rw
+      - /home/pawel/Data/bulk/Project_RNA_Jackson_Kaczmarczyk_S20_C3/run_170928_test:/input/run_171006:ro
+      - /home/pawel/Data/bulk/Project_RNA_Jackson_Kaczmarczyk_S20_C3/analysis:/output:rw

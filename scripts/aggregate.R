@@ -1,6 +1,6 @@
 library(tximport)
 
-tx2gene = read.csv("/index/tx2genes.csv")
+tx2gene = read.csv("/output/tx2genes.csv")
 
 basepath = "/output/kallisto"
 samples = dir(path=basepath, full.names=FALSE, no..=TRUE)
