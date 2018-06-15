@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -a
+set -aex
 
 input=/input
 output=/output

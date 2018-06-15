@@ -8,12 +8,6 @@ services:
       - JOBS=4
       - THREADS=10
 
-    # use when debugging
-    # command: ""
-    # entrypoint: "/bin/bash"
-    # stdin_open: true
-    # tty: true
-
     volumes:
 
       # mount the index file

@@ -10,5 +10,5 @@ cat $annotations \
     | cut -f 9 \
     | cut -d';' -f1-2 \
     | sed -e 's/gene_id //' -e 's/transcript_id //' -e 's/ //' \
-    | awk -F';' 'BEGIN{print "TXNAME,GENEID"}; {sub(/\.[0-9]+/,"",$1); print $2 "," $1}' \
+    | awk -F';' 'BEGIN{print "TXNAME,GENEID"}; {print $2 "," $1}' \
           > $output
