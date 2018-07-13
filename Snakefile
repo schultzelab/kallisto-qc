@@ -1,4 +1,3 @@
-from pathlib import Path
 from snakemake.shell import shell
 from collections import namedtuple
 
@@ -24,13 +23,20 @@ read="1")`.
     return data
 
 
-def get_sample_files(wildcards, single=True):
+def get_sample_files(sample, mode):
+    """Returns a list of fastq.gz files associated to a given `sample`. if
+single==True the list contains only R1, if single==False the list
+contains R1 and R2 paired by base filename (so [fileA_R1, fileA_R2,
+fileB_R1, fileB_R2, ...].
+
+    """
+
     files = []
     for datum in data_to_dict(get_file_data()):
-        if datum.sample == wildcards.sample:
+        if datum.sample == sample:
             args = datum._asdict()
             r1 = filepattern.format(**{**args, "read": "1"})
-            if single:
+            if mode=="single":
                 files.append((r1,))
             else:
                 r2 = filepattern.format(**{**args, "read": "2"})
@@ -41,18 +47,40 @@ def get_sample_files(wildcards, single=True):
     return files
 
 
-runs, samples, sids, lanes, reads, nums = get_file_data()
+def get_samples():
+    _, samples, _, _, _, _ = get_file_data()
+    return list(set(samples))
 
-if set(reads) == set(["1","2"]):
-    kallisto_single = False
-elif set(reads) == set(["1"]):
-    kallisto_single = True
+
+def get_mode():
+    _, _, _, _, reads, _ = get_file_data()
+
+    if set(reads) == set(["1","2"]):
+        return "paired"
+    elif set(reads) == set(["1"]):
+        return "single"
+    else:
+        raise Exception("Wrong read id")
+
+
+configfile: "config.yaml"
+samples = config['samples']
+mode = config['kallisto']['mode']
+pseudobam = bool(config['kallisto']['pseudobam'])
+kallisto_threads = int(config['kallisto']['threads'])
+
+if mode not in ["single","paired","auto"]:
+    raise Exception("Wrong mode for kallisto, available modes are single, paired and auto")
+
+if not samples:
+    samples = get_samples()
 else:
-    raise Exception("Wrong read id")
+    samples = list(map(str,set(samples)))
 
-pseudobam = False
-kallisto_threads = 10
+if mode == "auto":
+    mode = get_mode()
 
+print(samples)
 
 rule all:
     input:
@@ -63,7 +91,7 @@ rule all:
 
 rule aggregate:
     input:
-        abundance=list(set(expand("kallisto/{sample}/abundance.h5", sample=samples))),
+        abundance=expand("kallisto/{sample}/abundance.h5", sample=samples),
         tx2genes="tx2genes.csv",
     output:
         counts="counts.csv",
@@ -90,7 +118,7 @@ rule tx2genes:
 
 rule multiqc:
     input:
-        expand("logs/kallisto/{sample}.log",zip,sample=samples)
+        expand("logs/kallisto/{sample}.log",sample=samples)
     output:
         "multiqc/multiqc.html"
     log:
@@ -102,12 +130,14 @@ rule multiqc:
 
 rule kallisto_quant:
     input:
-        reads=lambda wildcards: get_sample_files(wildcards,single=kallisto_single),
-        index="/index/index.kidx"
+        reads=lambda wildcards: get_sample_files(wildcards.sample,mode=mode),
+        index="/index/index.kidx",
+        gtf="/index/annotations.gtf"
     output:
         "kallisto/{sample}/abundance.h5",
         "kallisto/{sample}/abundance.tsv",
-        "kallisto/{sample}/run_info.json"
+        "kallisto/{sample}/run_info.json",
+        "kallisto/{sample}/pseudoalignments.bam" if pseudobam else []
     threads:
         kallisto_threads
     log:
@@ -116,11 +146,10 @@ rule kallisto_quant:
         cmd = f"""kallisto quant -o kallisto/{wildcards.sample} -i {input.index} -t {kallisto_threads}"""
 
         if pseudobam:
-            cmd += " --pseudobam --genomebam"
-        if kallisto_single:
+            cmd += " --pseudobam --genomebam --gtf {input.gtf}"
+        if mode=="single":
             cmd += " --single -l 75 -s1"
         cmd += f""" {input.reads}"""
         cmd += f""" &> {log}"""
 
-        # print(cmd)
         shell(cmd)

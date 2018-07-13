@@ -1,0 +1,5 @@
+kallisto:
+  mode: "auto"
+  pseudobam: false
+  threads: 10
+samples: []
