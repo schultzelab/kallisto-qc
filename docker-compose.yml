@@ -5,16 +5,15 @@ services:
     build: .
     image: pwlb/bulk-rna-kallisto-qc
     environment:
-      - JOBS=4
-      - THREADS=10
+      - JOBS=10
 
     volumes:
 
       # mount the index file
-      - /home/pawel/Data/reference-files/kallisto/index_human/index:/index/index:ro
+      - /home/pawel/Data/reference-files/kallisto/index_human/index:/index/index.kidx:ro
 
       # and the tx2genes file (containing transcript vs gene names)
       - /home/pawel/Data/reference-files/kallisto/index_human/annotations.gtf:/index/annotations.gtf:ro
 
-      - /home/pawel/Data/bulk/Project_RNA_Jackson_Kaczmarczyk_S20_C3/run_170928_test:/input/run_171006:ro
-      - /home/pawel/Data/bulk/Project_RNA_Jackson_Kaczmarczyk_S20_C3/analysis:/output:rw
+      - ./test/fastq-paired:/input:ro
+      - ./output/paired:/output:rw

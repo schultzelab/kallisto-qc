@@ -1,10 +1,8 @@
 library(tximport)
 
-tx2gene = read.csv("/output/tx2genes.csv")
-
-basepath = "/output/kallisto"
-samples = dir(path=basepath, full.names=FALSE, no..=TRUE)
-files <- file.path(basepath, samples, "abundance.h5")
+tx2gene = read.csv(snakemake@input[["tx2genes"]])
+files <- snakemake@input[["abundance"]]
+samples <- sapply(files, function(x) strsplit(x,"/")[[1]][2])
 names(files) <- samples
 
 ## get ensembl gene ids with corresponding transcript ids and transcript version
@@ -28,16 +26,16 @@ row.names(ngenes.per.sample) = thresholds
 filter = apply(counts>0,1,sum)>0
 counts = counts[filter,]
 
-write.csv(ngenes.per.sample, file="/output/genecounts.csv")
-write.csv(counts, file="/output/counts.csv")
+write.csv(ngenes.per.sample, file=snakemake@output[["genecounts"]])
+write.csv(counts, file=snakemake@output[["counts"]])
 
 library(ggplot2)
 library(reshape2)
 
-genecounts=read.csv("/output/genecounts.csv",row.names=1)
+genecounts=read.csv(snakemake@output[["genecounts"]],row.names=1)
 genecounts$Category = row.names(ngenes.per.sample)
 
-pdf("/output/GeneCounts.pdf")
+pdf(snakemake@output[["genecounts_pdf"]])
 ggplot(melt(genecounts),aes(x=variable,y=value))+
     geom_point(aes(color=Category))+
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
