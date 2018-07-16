@@ -2,8 +2,9 @@
 
 ## Input and output formats ##
 
-You will need a kallisto index file, a tx2genes.csv file and the input
-fastq files.  The output is a set of QC reports and a count table.
+You will need a kallisto index file, an `annotations.gtf` file and the
+input fastq files.  The output is a set of QC reports and a count
+table.
 
 The internal scripts expect the following folder structure
 
