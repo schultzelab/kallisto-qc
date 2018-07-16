@@ -52,7 +52,7 @@ def get_samples():
     return list(set(samples))
 
 
-def get_mode():
+def mode_auto():
     _, _, _, _, reads, _ = get_file_data()
 
     if set(reads) == set(["1","2"]):
@@ -80,7 +80,7 @@ else:
     samples = list(map(str,set(samples)))
 
 if mode == "auto":
-    mode = get_mode()
+    mode = mode_auto()
 
 print(samples)
 
