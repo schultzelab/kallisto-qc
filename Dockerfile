@@ -1,4 +1,4 @@
-FROM pwlb/rna-seq-pipeline-base:v0.1.0
+FROM pwlb/rna-seq-pipeline-base:v0.1.1
 
 COPY install /install
 RUN Rscript /install/install.R
