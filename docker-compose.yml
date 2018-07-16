@@ -4,8 +4,7 @@ services:
   bulk-rna-kallisto-qc:
     build: .
     image: pwlb/bulk-rna-kallisto-qc
-    environment:
-      - JOBS=10
+    command: --jobs 11
 
     volumes:
 

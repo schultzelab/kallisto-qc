@@ -63,11 +63,13 @@ def get_mode():
         raise Exception("Wrong read id")
 
 
-configfile: "config.yaml"
+configfile: "/config.yaml"
 samples = config['samples']
 mode = config['kallisto']['mode']
 pseudobam = bool(config['kallisto']['pseudobam'])
 kallisto_threads = int(config['kallisto']['threads'])
+readlength = int(config['kallisto']['readlength'])
+readstd = int(config['kallisto']['readstd'])
 
 if mode not in ["single","paired","auto"]:
     raise Exception("Wrong mode for kallisto, available modes are single, paired and auto")
@@ -84,6 +86,7 @@ print(samples)
 
 rule all:
     input:
+        "config.yaml",
         "multiqc/multiqc.html",
         "counts.csv",
         "genecounts.csv",
@@ -146,10 +149,18 @@ rule kallisto_quant:
         cmd = f"""kallisto quant -o kallisto/{wildcards.sample} -i {input.index} -t {kallisto_threads}"""
 
         if pseudobam:
-            cmd += " --pseudobam --genomebam --gtf {input.gtf}"
+            cmd += f""" --pseudobam --genomebam --gtf {input.gtf}"""
         if mode=="single":
-            cmd += " --single -l 75 -s1"
+            cmd += f""" --single -l {readlength} -s{readstd}"""
         cmd += f""" {input.reads}"""
         cmd += f""" &> {log}"""
 
         shell(cmd)
+
+rule copy_config:
+    input:
+        "/config.yaml"
+    output:
+        "config.yaml"
+    shell:
+        "cp {input} {output}"

@@ -7,5 +7,5 @@ COPY scripts /scripts
 COPY Snakefile /Snakefile
 COPY config/config.yaml /config.yaml
 
-ENTRYPOINT ["bash","/scripts/run-all.sh"]
+ENTRYPOINT ["snakemake", "--snakefile", "/Snakefile", "--directory", "/output", "--jobs", "10"]
 CMD [""]
