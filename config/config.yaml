@@ -2,6 +2,6 @@ kallisto:
   mode: "auto"
   pseudobam: false
   threads: 10
-  readlenght: 75
+  readlength: 75
   readstd: 1
 samples: []
