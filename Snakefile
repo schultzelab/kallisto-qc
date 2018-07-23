@@ -90,7 +90,8 @@ rule all:
         "multiqc/multiqc.html",
         "counts.csv",
         "genecounts.csv",
-        "GeneCounts.pdf"
+        "GeneCounts.pdf",
+        expand("kallisto/{sample}/abundance.h5", sample=samples)
 
 rule aggregate:
     input:
