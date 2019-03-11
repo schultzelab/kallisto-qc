@@ -3,7 +3,7 @@ version: '3'
 services:
   bulk-rna-kallisto-qc:
     build: .
-    image: pwlb/bulk-rna-kallisto-qc
+    image: schultzelab/bulk-rna-kallisto-qc:v0.0.1
     command: --jobs 11
 
     volumes:
